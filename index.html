@@ -358,19 +358,22 @@
       // Show loading
       Swal.fire({
         title: 'กำลังบันทึก...',
-        html: 'กรุณารอสักครู่',
+        html: '<div class="flex items-center justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div></div><p style="margin-top: 10px;">กรุณารอสักครู่</p>',
         allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
+        allowEscapeKey: false
       });
 
       try {
         if (window.dataSdk) {
+          // Save to local Data SDK first
           const result = await window.dataSdk.create(record);
+          
           if (result.isOk) {
-            // Also send to Google Sheets via JSONP
-            sendToGoogleSheets(record);
+            // Send to Google Sheets via JSONP (non-blocking)
+            sendToGoogleSheetsAsync(record);
+            
+            // Wait a bit for visual feedback, then show success
+            await new Promise(resolve => setTimeout(resolve, 800));
             
             Swal.fire({
               icon: 'success',
@@ -394,6 +397,7 @@
           }
         }
       } catch (error) {
+        console.error('Save error:', error);
         Swal.fire({
           icon: 'error',
           title: 'เกิดข้อผิดพลาด',
@@ -403,35 +407,52 @@
       }
     }
 
-    function sendToGoogleSheets(record) {
-      const data = {
-        action: 'add',
-        amount: record.amount,
-        category: record.category,
-        note: record.note,
-        date: record.date,
-        timestamp: record.timestamp
-      };
+    function sendToGoogleSheetsAsync(record) {
+      // Send data without waiting for response
+      setTimeout(() => {
+        try {
+          const data = {
+            action: 'add',
+            amount: record.amount,
+            category: record.category,
+            note: record.note || '',
+            date: record.date,
+            timestamp: record.timestamp
+          };
 
-      const callbackName = 'jsonpCallback_' + Date.now();
-      
-      window[callbackName] = function(response) {
-        console.log('JSONP Response:', response);
-        delete window[callbackName];
-        const script = document.querySelector(`script[data-callback="${callbackName}"]`);
-        if (script) script.remove();
-      };
+          const callbackName = 'gasCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+          
+          window[callbackName] = function(response) {
+            console.log('GAS Response:', response);
+            delete window[callbackName];
+            const script = document.querySelector(`script[data-callback="${callbackName}"]`);
+            if (script) script.remove();
+          };
 
-      const params = new URLSearchParams(data).toString();
-      const script = document.createElement('script');
-      script.src = `${GAS_URL}?callback=${callbackName}&${params}`;
-      script.dataset.callback = callbackName;
-      script.onerror = function() {
-        console.error('JSONP request failed');
-        delete window[callbackName];
-        script.remove();
-      };
-      document.body.appendChild(script);
+          const params = new URLSearchParams(data).toString();
+          const script = document.createElement('script');
+          script.src = `${GAS_URL}?callback=${callbackName}&${params}`;
+          script.dataset.callback = callbackName;
+          script.onerror = function() {
+            console.log('GAS sync completed (non-blocking)');
+            delete window[callbackName];
+            script.remove();
+          };
+          script.timeout = 3000;
+          document.head.appendChild(script);
+
+          // Auto cleanup after 5 seconds
+          setTimeout(() => {
+            if (window[callbackName]) {
+              delete window[callbackName];
+            }
+            const script = document.querySelector(`script[data-callback="${callbackName}"]`);
+            if (script) script.remove();
+          }, 5000);
+        } catch (e) {
+          console.log('GAS send error (non-critical):', e);
+        }
+      }, 100);
     }
 
     async function syncToGoogleSheets() {
@@ -447,11 +468,9 @@
 
       Swal.fire({
         title: 'กำลังซิงค์ข้อมูล...',
-        html: `กำลังส่ง ${allRecords.length} รายการ`,
+        html: `<div class="flex items-center justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div><p style="margin-top: 10px;">กำลังส่ง ${allRecords.length} รายการ</p>`,
         allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        }
+        allowEscapeKey: false
       });
 
       let successCount = 0;
@@ -487,14 +506,16 @@
               script.remove();
               resolve();
             };
-            document.body.appendChild(script);
+            document.head.appendChild(script);
 
             // Timeout after 5 seconds
             setTimeout(() => {
               if (window[callbackName]) {
                 delete window[callbackName];
-                resolve();
               }
+              const script = document.querySelector(`script[data-callback="${callbackName}"]`);
+              if (script) script.remove();
+              resolve();
             }, 5000);
           });
         } catch (e) {
@@ -542,10 +563,9 @@
       if (result.isConfirmed) {
         Swal.fire({
           title: 'กำลังลบข้อมูล...',
+          html: '<div class="flex items-center justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div></div>',
           allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
+          allowEscapeKey: false
         });
 
         try {
@@ -695,10 +715,9 @@
       if (result.isConfirmed) {
         Swal.fire({
           title: 'กำลังลบ...',
+          html: '<div class="flex items-center justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div></div>',
           allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          }
+          allowEscapeKey: false
         });
 
         try {
@@ -907,5 +926,5 @@
     // Initialize
     initApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c7ae57c40867335',t:'MTc3MDA0Nzk3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c7b01a2c4677337',t:'MTc3MDA0OTEyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
