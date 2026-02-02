@@ -3,12 +3,11 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Income Tracker Pro</title>
+  <title>Income Tracker WebApp v.3.0</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="/_sdk/element_sdk.js"></script>
-  <script src="/_sdk/data_sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
     body {
@@ -19,9 +18,6 @@
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
       color: white;
       transform: scale(1.05);
-    }
-    .card-gradient {
-      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
     }
     .income-card {
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -58,6 +54,7 @@
     }
   </style>
   <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full bg-gradient-to-br from-emerald-50 via-white to-teal-50">
   <div id="app" class="h-full flex flex-col overflow-hidden"><!-- Header -->
@@ -67,8 +64,8 @@
       <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><span class="text-2xl">💰</span>
       </div>
       <div>
-       <h1 id="app-title" class="text-xl font-bold">Income Tracker Pro</h1>
-       <p class="text-emerald-100 text-xs">V.3.0</p>
+       <h1 id="app-title" class="text-xl font-bold">Income Tracker WebApp v.3.0</h1>
+       <p class="text-emerald-100 text-xs">Local Storage</p>
       </div>
      </div>
      <div class="text-right">
@@ -106,7 +103,7 @@
      </div><!-- History Section -->
      <div class="bg-white rounded-2xl shadow-lg p-4 border border-emerald-100">
       <div class="flex items-center justify-between mb-3">
-       <h2 class="font-semibold text-gray-800 flex items-center gap-2"><span class="text-xl">📋</span> ประวัติรายได้</h2><select id="filter-period" class="px-3 py-1 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-emerald-500"> <option value="today">วันนี้</option> <option value="week">สัปดาห์นี้</option> <option value="month" selected>เดือนนี้</option> <option value="all">ทั้งหมด</option> </select>
+       <h2 class="font-semibold text-gray-800 flex items-center gap-2"><span class="text-xl">📋</span> ปร✔วัติรายได้</h2><select id="filter-period" class="px-3 py-1 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:border-emerald-500"> <option value="today">วันนี้</option> <option value="week">สัปดาห์นี้</option> <option value="month" selected>เดือนนี้</option> <option value="all">ทั้งหมด</option> </select>
       </div>
       <div id="history-list" class="space-y-2 max-h-64 overflow-auto">
        <p class="text-center text-gray-400 py-8">ยังไม่มีรายการ</p>
@@ -136,19 +133,20 @@
     <div id="tab-settings" class="tab-content hidden">
      <div class="bg-white rounded-2xl shadow-lg p-4 mb-4 border border-emerald-100">
       <h2 class="font-semibold text-gray-800 mb-4 flex items-center gap-2"><span class="text-xl">⚙️</span> ตั้งค่าทั่วไป</h2>
-      <div class="mb-4"><label class="block text-sm text-gray-600 mb-1">ชื่อแอป</label> <input type="text" id="settings-app-name" placeholder="Income Tracker Pro" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-gray-800">
+      <div class="mb-4"><label class="block text-sm text-gray-600 mb-1">ชื่อแอป</label> <input type="text" id="settings-app-name" placeholder="Income Tracker WebApp v.3.0" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-emerald-500 focus:outline-none text-gray-800">
       </div><button id="save-settings-btn" type="button" class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"> <span>💾</span> บันทึกการตั้งค่า </button>
      </div>
      <div class="bg-white rounded-2xl shadow-lg p-4 mb-4 border border-emerald-100">
-      <h2 class="font-semibold text-gray-800 mb-4 flex items-center gap-2"><span class="text-xl">📤</span> การซิงค์ข้อมูล</h2>
-      <p class="text-sm text-gray-500 mb-3">ส่งข้อมูลทั้งหมดไปยัง Google Sheets</p><button id="sync-btn" type="button" class="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"> <span>☁️</span> ซิงค์ไปยัง Google Sheets </button>
+      <h2 class="font-semibold text-gray-800 mb-4 flex items-center gap-2"><span class="text-xl">📥</span> นำเข้า/ส่งออก</h2>
+      <div class="flex gap-2"><button id="export-btn" type="button" class="flex-1 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"> <span>📤</span> ส่งออก </button> <button id="import-btn" type="button" class="flex-1 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"> <span>📥</span> นำเข้า </button>
+      </div><input type="file" id="import-file" accept=".json" style="display: none;">
      </div>
      <div class="bg-white rounded-2xl shadow-lg p-4 border border-red-100">
       <h2 class="font-semibold text-red-600 mb-4 flex items-center gap-2"><span class="text-xl">⚠️</span> โซนอันตราย</h2>
       <p class="text-sm text-gray-500 mb-3">การลบข้อมูลจะไม่สามารถกู้คืนได้</p><button id="delete-all-btn" type="button" class="w-full py-3 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"> <span>🗑️</span> ลบข้อมูลทั้งหมด </button>
      </div>
      <div class="mt-4 text-center text-gray-400 text-sm">
-      <p>Income Tracker Pro V.3.0</p>
+      <p>Income Tracker WebApp v.3.0</p>
       <p>© 2024 All Rights Reserved</p>
      </div>
     </div>
@@ -172,12 +170,9 @@
     let categoryChart = null;
     let config = {};
 
-    // Google Apps Script URL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyVSOvRy5qFlME2ucOfpe1FlZCrjz-FtmfnHeXbfbwpl5FQUtndB_jcf9QAgk_MwHpn/exec';
-
     // Default Config
     const defaultConfig = {
-      app_title: 'Income Tracker Pro'
+      app_title: 'Income Tracker WebApp v.3.0'
     };
 
     // Category Icons
@@ -233,18 +228,8 @@
         config = defaultConfig;
       }
 
-      // Initialize Data SDK
-      if (window.dataSdk) {
-        const initResult = await window.dataSdk.init({
-          onDataChanged: (data) => {
-            allRecords = data || [];
-            updateUI();
-          }
-        });
-        if (!initResult.isOk) {
-          console.error('Failed to initialize data SDK');
-        }
-      }
+      // Load from localStorage
+      loadFromLocalStorage();
 
       // Setup Event Listeners
       setupEventListeners();
@@ -283,7 +268,11 @@
 
       // Settings
       document.getElementById('save-settings-btn').addEventListener('click', saveSettings);
-      document.getElementById('sync-btn').addEventListener('click', syncToGoogleSheets);
+      document.getElementById('export-btn').addEventListener('click', exportData);
+      document.getElementById('import-btn').addEventListener('click', () => {
+        document.getElementById('import-file').click();
+      });
+      document.getElementById('import-file').addEventListener('change', importData);
       document.getElementById('delete-all-btn').addEventListener('click', deleteAllData);
     }
 
@@ -335,19 +324,9 @@
         return;
       }
 
-      // Check data limit
-      if (allRecords.length >= 999) {
-        Swal.fire({
-          icon: 'error',
-          title: 'เกินจำนวนที่กำหนด',
-          text: 'ข้อมูลเต็มแล้ว (999 รายการ) กรุณาลบข้อมูลเก่า',
-          confirmButtonColor: '#10b981'
-        });
-        return;
-      }
-
       const now = new Date();
       const record = {
+        id: 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
         amount: amount,
         category: selectedCategory,
         note: noteInput.value || '',
@@ -364,38 +343,30 @@
       });
 
       try {
-        if (window.dataSdk) {
-          // Save to local Data SDK first
-          const result = await window.dataSdk.create(record);
-          
-          if (result.isOk) {
-            // Send to Google Sheets via JSONP (non-blocking)
-            sendToGoogleSheetsAsync(record);
-            
-            // Wait a bit for visual feedback, then show success
-            await new Promise(resolve => setTimeout(resolve, 800));
-            
-            Swal.fire({
-              icon: 'success',
-              title: 'บันทึกสำเร็จ! ✅',
-              text: `บันทึกรายได้ ฿${formatNumber(amount)} แล้ว`,
-              confirmButtonColor: '#10b981',
-              timer: 2000,
-              timerProgressBar: true
-            });
+        allRecords.push(record);
+        saveToLocalStorage();
 
-            // Clear form
-            amountInput.value = '';
-            noteInput.value = '';
-            selectedCategory = null;
-            document.querySelectorAll('.category-chip').forEach(c => {
-              c.classList.remove('selected', 'border-emerald-500', 'bg-emerald-50');
-              c.classList.add('border-gray-200');
-            });
-          } else {
-            throw new Error('Failed to save');
-          }
-        }
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        Swal.fire({
+          icon: 'success',
+          title: 'บันทึกสำเร็จ! ✅',
+          text: `บันทึกรายได้ ฿${formatNumber(amount)} แล้ว`,
+          confirmButtonColor: '#10b981',
+          timer: 2000,
+          timerProgressBar: true
+        });
+
+        // Clear form
+        amountInput.value = '';
+        noteInput.value = '';
+        selectedCategory = null;
+        document.querySelectorAll('.category-chip').forEach(c => {
+          c.classList.remove('selected', 'border-emerald-500', 'bg-emerald-50');
+          c.classList.add('border-gray-200');
+        });
+
+        updateUI();
       } catch (error) {
         console.error('Save error:', error);
         Swal.fire({
@@ -405,130 +376,6 @@
           confirmButtonColor: '#10b981'
         });
       }
-    }
-
-    function sendToGoogleSheetsAsync(record) {
-      // Send data without waiting for response
-      setTimeout(() => {
-        try {
-          const data = {
-            action: 'add',
-            amount: record.amount,
-            category: record.category,
-            note: record.note || '',
-            date: record.date,
-            timestamp: record.timestamp
-          };
-
-          const callbackName = 'gasCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-          
-          window[callbackName] = function(response) {
-            console.log('GAS Response:', response);
-            delete window[callbackName];
-            const script = document.querySelector(`script[data-callback="${callbackName}"]`);
-            if (script) script.remove();
-          };
-
-          const params = new URLSearchParams(data).toString();
-          const script = document.createElement('script');
-          script.src = `${GAS_URL}?callback=${callbackName}&${params}`;
-          script.dataset.callback = callbackName;
-          script.onerror = function() {
-            console.log('GAS sync completed (non-blocking)');
-            delete window[callbackName];
-            script.remove();
-          };
-          script.timeout = 3000;
-          document.head.appendChild(script);
-
-          // Auto cleanup after 5 seconds
-          setTimeout(() => {
-            if (window[callbackName]) {
-              delete window[callbackName];
-            }
-            const script = document.querySelector(`script[data-callback="${callbackName}"]`);
-            if (script) script.remove();
-          }, 5000);
-        } catch (e) {
-          console.log('GAS send error (non-critical):', e);
-        }
-      }, 100);
-    }
-
-    async function syncToGoogleSheets() {
-      if (allRecords.length === 0) {
-        Swal.fire({
-          icon: 'info',
-          title: 'ไม่มีข้อมูล',
-          text: 'ยังไม่มีข้อมูลที่จะซิงค์',
-          confirmButtonColor: '#10b981'
-        });
-        return;
-      }
-
-      Swal.fire({
-        title: 'กำลังซิงค์ข้อมูล...',
-        html: `<div class="flex items-center justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div><p style="margin-top: 10px;">กำลังส่ง ${allRecords.length} รายการ</p>`,
-        allowOutsideClick: false,
-        allowEscapeKey: false
-      });
-
-      let successCount = 0;
-      
-      for (const record of allRecords) {
-        try {
-          await new Promise((resolve) => {
-            const callbackName = 'syncCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            
-            window[callbackName] = function(response) {
-              successCount++;
-              delete window[callbackName];
-              const script = document.querySelector(`script[data-callback="${callbackName}"]`);
-              if (script) script.remove();
-              resolve();
-            };
-
-            const data = {
-              action: 'add',
-              amount: record.amount,
-              category: record.category,
-              note: record.note || '',
-              date: record.date,
-              timestamp: record.timestamp
-            };
-
-            const params = new URLSearchParams(data).toString();
-            const script = document.createElement('script');
-            script.src = `${GAS_URL}?callback=${callbackName}&${params}`;
-            script.dataset.callback = callbackName;
-            script.onerror = function() {
-              delete window[callbackName];
-              script.remove();
-              resolve();
-            };
-            document.head.appendChild(script);
-
-            // Timeout after 5 seconds
-            setTimeout(() => {
-              if (window[callbackName]) {
-                delete window[callbackName];
-              }
-              const script = document.querySelector(`script[data-callback="${callbackName}"]`);
-              if (script) script.remove();
-              resolve();
-            }, 5000);
-          });
-        } catch (e) {
-          console.error('Sync error:', e);
-        }
-      }
-
-      Swal.fire({
-        icon: 'success',
-        title: 'ซิงค์สำเร็จ! ☁️',
-        text: `ส่งข้อมูล ${successCount}/${allRecords.length} รายการไปยัง Google Sheets`,
-        confirmButtonColor: '#10b981'
-      });
     }
 
     async function saveSettings() {
@@ -546,6 +393,91 @@
         confirmButtonColor: '#10b981',
         timer: 1500
       });
+    }
+
+    function exportData() {
+      if (allRecords.length === 0) {
+        Swal.fire({
+          icon: 'info',
+          title: 'ไม่มีข้อมูล',
+          text: 'ยังไม่มีข้อมูลที่จะส่งออก',
+          confirmButtonColor: '#10b981'
+        });
+        return;
+      }
+
+      const dataToExport = {
+        version: '3.0',
+        exportDate: new Date().toISOString(),
+        records: allRecords
+      };
+
+      const json = JSON.stringify(dataToExport, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `income-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'ส่งออกสำเร็จ! 📤',
+        text: `ส่งออก ${allRecords.length} รายการ`,
+        confirmButtonColor: '#10b981',
+        timer: 2000
+      });
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          
+          if (!data.records || !Array.isArray(data.records)) {
+            throw new Error('Invalid file format');
+          }
+
+          const result = await Swal.fire({
+            icon: 'question',
+            title: 'ยืนยันการนำเข้า?',
+            text: `จะนำเข้า ${data.records.length} รายการ`,
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'นำเข้า',
+            cancelButtonText: 'ยกเลิก'
+          });
+
+          if (result.isConfirmed) {
+            allRecords = [...allRecords, ...data.records];
+            saveToLocalStorage();
+            updateUI();
+
+            Swal.fire({
+              icon: 'success',
+              title: 'นำเข้าสำเร็จ! 📥',
+              text: `นำเข้า ${data.records.length} รายการ`,
+              confirmButtonColor: '#10b981',
+              timer: 2000
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถอ่านไฟล์ได้',
+            confirmButtonColor: '#10b981'
+          });
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
     }
 
     async function deleteAllData() {
@@ -569,11 +501,9 @@
         });
 
         try {
-          if (window.dataSdk && allRecords.length > 0) {
-            for (const record of [...allRecords]) {
-              await window.dataSdk.delete(record);
-            }
-          }
+          allRecords = [];
+          saveToLocalStorage();
+          updateUI();
 
           Swal.fire({
             icon: 'success',
@@ -686,7 +616,7 @@
             </div>
             <div class="flex items-center gap-2">
               <span class="font-bold text-emerald-600">+฿${formatNumber(record.amount)}</span>
-              <button type="button" onclick="deleteRecord('${record.__backendId}')" class="p-1 text-gray-400 hover:text-red-500 transition-colors">
+              <button type="button" onclick="deleteRecord('${record.id}')" class="p-1 text-gray-400 hover:text-red-500 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                 </svg>
@@ -697,51 +627,29 @@
       }).join('');
     }
 
-    async function deleteRecord(backendId) {
-      const record = allRecords.find(r => r.__backendId === backendId);
-      if (!record) return;
-
-      const result = await Swal.fire({
+    function deleteRecord(recordId) {
+      Swal.fire({
         icon: 'question',
         title: 'ลบรายการนี้?',
-        text: `${record.category} - ฿${formatNumber(record.amount)}`,
         showCancelButton: true,
         confirmButtonColor: '#ef4444',
         cancelButtonColor: '#6b7280',
         confirmButtonText: 'ลบ',
         cancelButtonText: 'ยกเลิก'
-      });
+      }).then(result => {
+        if (result.isConfirmed) {
+          allRecords = allRecords.filter(r => r.id !== recordId);
+          saveToLocalStorage();
+          updateUI();
 
-      if (result.isConfirmed) {
-        Swal.fire({
-          title: 'กำลังลบ...',
-          html: '<div class="flex items-center justify-center"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div></div>',
-          allowOutsideClick: false,
-          allowEscapeKey: false
-        });
-
-        try {
-          if (window.dataSdk) {
-            const deleteResult = await window.dataSdk.delete(record);
-            if (deleteResult.isOk) {
-              Swal.fire({
-                icon: 'success',
-                title: 'ลบสำเร็จ',
-                timer: 1500,
-                confirmButtonColor: '#10b981'
-              });
-            } else {
-              throw new Error('Delete failed');
-            }
-          }
-        } catch (error) {
           Swal.fire({
-            icon: 'error',
-            title: 'เกิดข้อผิดพลาด',
+            icon: 'success',
+            title: 'ลบสำเร็จ',
+            timer: 1500,
             confirmButtonColor: '#10b981'
           });
         }
-      }
+      });
     }
 
     function updateCharts() {
@@ -923,8 +831,29 @@
       return num.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
     }
 
+    function saveToLocalStorage() {
+      try {
+        localStorage.setItem('income_tracker_data', JSON.stringify(allRecords));
+      } catch (error) {
+        console.error('Error saving to localStorage:', error);
+      }
+    }
+
+    function loadFromLocalStorage() {
+      try {
+        const data = localStorage.getItem('income_tracker_data');
+        if (data) {
+          allRecords = JSON.parse(data);
+          updateUI();
+        }
+      } catch (error) {
+        console.error('Error loading from localStorage:', error);
+        allRecords = [];
+      }
+    }
+
     // Initialize
     initApp();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c7b01a2c4677337',t:'MTc3MDA0OTEyOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c7b0c97e52974d4',t:'MTc3MDA0OTU3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
